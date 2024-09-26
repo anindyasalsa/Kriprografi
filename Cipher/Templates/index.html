@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cipher Encryption & Decryption</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4a90e2;
+            margin-bottom: 20px;
+        }
+
+        form {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 600px;
+            margin: auto;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+
+        textarea,
+        input[type="text"],
+        input[type="file"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+
+        button {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #357ab8;
+        }
+
+        button[type="reset"] {
+            background-color: #e74c3c;
+            margin-left: 10px;
+        }
+
+        button[type="reset"]:hover {
+            background-color: #c0392b;
+        }
+
+        #result {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            display: none; /* Initially hidden */
+        }
+
+        .cipher-buttons,
+        .operation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .cipher-button,
+        .operation-button {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f0f4f8;
+            color: #333;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin: 0 5px; /* Add spacing between buttons */
+        }
+
+        .cipher-button.selected,
+        .operation-button.selected {
+            background-color: #4a90e2;
+            color: white;
+            border: 1px solid #4a90e2;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center; /* Center horizontally */
+            margin-top: 20px; /* Add some space above the buttons */
+        }
+
+        .button-container button {
+            margin: 0 10px; /* Add spacing between the buttons */
+        }
+    </style>
+</head>
+<body>
+    <h1>Cipher Encryption & Decryption</h1>
+
+    <form id="cipher-form" action="/process" method="post" enctype="multipart/form-data">
+        <label for="cipher">Choose Cipher:</label>
+        <div id="cipher" class="cipher-buttons">
+            <button type="button" class="cipher-button" data-value="vigenere" onclick="selectCipher('vigenere')">Vigenère Cipher</button>
+            <button type="button" class="cipher-button" data-value="playfair" onclick="selectCipher('playfair')">Playfair Cipher</button>
+            <button type="button" class="cipher-button" data-value="hill" onclick="selectCipher('hill')">Hill Cipher</button>
+        </div>
+
+        <label for="operation">Operation:</label>
+        <div id="operation" class="operation-buttons">
+            <button type="button" class="operation-button" data-value="encrypt" onclick="selectOperation('encrypt')">Encrypt</button>
+            <button type="button" class="operation-button" data-value="decrypt" onclick="selectOperation('decrypt')">Decrypt</button>
+        </div>
+        
+        <label for="key">Enter Key (min 12 characters):</label>
+        <input type="text" id="key" name="key" minlength="12" required>
+
+        <label for="message">Enter Text:</label>
+        <textarea id="message" name="message" rows="4" cols="50" placeholder="Type your text here..."></textarea>
+
+        <label for="file">Or upload a .txt file:</label>
+        <input type="file" id="file" name="file" accept=".txt">
+
+
+        <div class="button-container">
+            <button type="submit">Submit</button>
+            <button type="reset">Reset</button>
+        </div>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        let selectedCipher = 'vigenere'; // Default selection
+        let selectedOperation = 'encrypt'; // Default selection
+
+        function selectCipher(cipher) {
+            selectedCipher = cipher;
+            const buttons = document.querySelectorAll('.cipher-button');
+            buttons.forEach(button => {
+                button.classList.remove('selected');
+            });
+            document.querySelector(`button[data-value="${cipher}"]`).classList.add('selected');
+        }
+
+        function selectOperation(operation) {
+            selectedOperation = operation;
+            const buttons = document.querySelectorAll('.operation-button');
+            buttons.forEach(button => {
+                button.classList.remove('selected');
+            });
+            document.querySelector(`button[data-value="${operation}"]`).classList.add('selected');
+        }
+
+        document.getElementById('cipher-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            const formData = new FormData(this); // Get form data
+            formData.append('cipher', selectedCipher); // Add selected cipher
+            formData.append('operation', selectedOperation); // Add selected operation
+
+            fetch('/process', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('result').innerHTML = data; // Display result
+                document.getElementById('result').style.display = 'block'; // Show the result div
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
